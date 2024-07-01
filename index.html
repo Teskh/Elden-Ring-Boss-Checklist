@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boss Checklist</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 1.2em;
+        }
+        .counter {
+            font-size: 0.8em;
+            color: #a0a0a0;
+        }
+        #overallCounter {
+            font-size: 1.5em;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .location {
+            margin-bottom: 20px;
+        }
+        a {
+            color: #add8e6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #ffd700;
+        }
+        .sote {
+            color: #ff6b6b;
+        }
+        .checked-item {
+            background-color: #1d1c1c;
+            color: #8a8a8a;
+        }
+        .checked-item a {
+            color: #4e626e;
+        }
+        .checked-item .sote {
+            color: #c75252;
+        }
+    </style>
+</head>
+<body>
+    <h1>Boss Checklist</h1>
+    <div id="overallCounter" class="counter">0/0</div>
+    <div id="checklist"></div>
+    <script>
+        const bossesByLocation = {
+            "LIMGRAVE": [
+                "Beastman of Farum Azula", "Bell Bearing Hunter", "Black Knife Assassin",
+                "Bloodhound Knight Darriwil", "Crucible Knight", "Deathbird",
+                "Demi-Human Chief", "Erdtree Burial Watchdog (Stormfoot Catacombs)",
+                "Flying Dragon Agheel", "Godrick the Grafted", "Grafted Scion",
+                "Grave Warden Duelist", "Guardian Golem", "Mad Pumpkin Head",
+                "Margit, the Fell Omen", "Night's Cavalry", "Patches",
+                "Soldier of Godrick", "Stonedigger Troll", "Tibia Mariner",
+                "Tree Sentinel", "Ulcerated Tree Spirit"
+            ],
+            "WEEPING PENINSULA": [
+                "Ancient Hero of Zamor", "Cemetery Shade", "Deathbird",
+                "Erdtree Avatar", "Erdtree Burial Watchdog (Impaler's Catacombs)",
+                "Leonine Misbegotten", "Miranda the Blighted Bloom", "Night's Cavalry",
+                "Runebear", "Scaly Misbegotten"
+            ],
+            "LIURNIA OF THE LAKES": [
+                "Adan, Thief of Fire", "Alabaster Lord", "Alecto, Black Knife Ringleader",
+                "Bell Bearing Hunter", "Black Knife Assassin", "Bloodhound Knight",
+                "Bols, Carian Knight", "Cemetery Shade", "Cleanrot Knight",
+                "Crystalian", "Crystalian Spear & Crystalian Staff (Duo)",
+                "Death Rite Bird", "Deathbird", "Erdtree Avatar (Liurnia Northeast)",
+                "Erdtree Avatar (Liurnia Southwest)", "Erdtree Burial Watchdog",
+                "Glintstone Dragon Adula", "Glintstone Dragon Smarag", "Magma Wyrm Makar",
+                "Night's Cavalry (Liurnia North)", "Night's Cavalry (Liurnia South)",
+                "Omenkiller", "Red Wolf of Radagon", "Rennala, Queen of the Full Moon",
+                "Royal Knight Loretta", "Royal Revenant", "Spirit-Caller Snail",
+                "Tibia Mariner"
+            ],
+            "CAELID": [
+                "Cemetery Shade", "Commander O'Neil", "Crucible Knight & Misbegotten Warrior",
+                "Death Rite Bird", "Decaying Ekzykes", "Erdtree Avatar",
+                "Erdtree Burial Watchdog (Duo)", "Fallingstar Beast", "Frenzied Duelist",
+                "Mad Pumpkin Heads", "Magma Wyrm", "Night's Cavalry (Caelid)",
+                "Nox Swordstress & Nox Priest", "Starscourge Radahn"
+            ],
+            "DRAGONBARROW": [
+                "Battlemage Hugues", "Beastman of Farum Azula (Duo)", "Bell Bearing Hunter",
+                "Black Blade Kindred", "Cleanrot Knight (Duo)", "Elder Dragon Greyoll",
+                "Flying Dragon Greyll", "Godskin Apostle", "Night's Cavalry (Dragonbarrow)",
+                "Putrid Avatar", "Putrid Crystalian Trio", "Putrid Tree Spirit"
+            ],
+            "ALTUS PLATEAU": [
+                "Ancient Dragon Lansseax", "Ancient Hero of Zamor",
+                "Black Knife Assassin (Sage's Cave)", "Black Knife Assassin (Sainted Hero's Grave)",
+                "Crystalian Spear & Crystalian Ringblade", "Demi-Human Queen Gilika",
+                "Elemer of the Briar", "Erdtree Burial Watchdog", "Fallingstar Beast",
+                "Godefroy The Grafted", "Godskin Apostle", "Necromancer Garris",
+                "Night's Cavalry", "Omenkiller & Miranda the Blighted Bloom",
+                "Perfumer Tricia & Misbegotten Warrior", "Sanguine Noble",
+                "Stonedigger Troll", "Tibia Mariner", "Tree Sentinel (Duo)", "Wormface"
+            ],
+            "MT. GELMIR": [
+                "Abductor Virgins (Duo)", "Demi-Human Queen Maggie",
+                "Demi-Human Queen Margot", "Full-Grown Fallingstar Beast",
+                "God-Devouring Serpent / Rykard, Lord of Blasphemy", "Godskin Noble",
+                "Kindred of Rot (Duo)", "Magma Wyrm (Fort Laiedd)",
+                "Red Wolf of the Champion", "Ulcerated Tree Spirit"
+            ],
+            "CAPITAL OUTSKIRTS": [
+                "Bell Bearing Hunter", "Crucible Knight & Crucible Knight Ordovis",
+                "Deathbird", "Draconic Tree Sentinel", "Fell Twins",
+                "Grave Warden Duelist", "Onyx Lord"
+            ],
+            "LEYNDELL, ROYAL CAPITAL": [
+                "Esgar, Priest of Blood", "Godfrey, First Elden Lord",
+                "Mohg, the Omen", "Morgott, the Omen King"
+            ],
+            "MOUNTAINTOPS OF THE GIANTS": [
+                "Ancient Hero of Zamor", "Borealis the Freezing Fog", "Commander Niall",
+                "Death Rite Bird", "Erdtree Avatar", "Fire Giant",
+                "Godskin Apostle and Godskin Noble (Spiritcaller Snail)", "Tibia Mariner",
+                "Ulcerated Tree Spirit", "Vyke, Knight of the Roundtable"
+            ],
+            "CRUMBLING FARUM AZULA": [
+                "Beast Clergyman / Maliketh, the Black Blade", "Dragonlord Placidusax",
+                "Godskin Duo"
+            ],
+            "FORBIDDEN LANDS": [
+                "Black Blade Kindred", "Night's Cavalry", "Stray Mimic Tear"
+            ],
+            "CONSECRATED SNOWFIELD": [
+                "Astel, Stars of Darkness", "Death Rite Bird", "Great Wyrm Theodorix",
+                "Misbegotten Crusader", "Night's Cavalry (Duo)", "Putrid Avatar",
+                "Putrid Grave Warden Duelist"
+            ],
+            "MIQUELLA'S HALIGTREE": [
+                "Loretta, Knight of the Haligtree", "Malenia, Blade of Miquella"
+            ],
+            "SIOFRA RIVER": [
+                "Ancestor Spirit", "Dragonkin Soldier", "Mohg, Lord of Blood"
+            ],
+            "AINSEL RIVER": [
+                "Dragonkin Soldier of Nokstella"
+            ],
+            "NOKRON, ETERNAL CITY": [
+                "Mimic Tear", "Regal Ancestor Spirit",
+                "Valiant Gargoyle & Valiant Gargoyle (Twinblade)"
+            ],
+            "DEEPROOT DEPTHS": [
+                "Crucible Knight Siluria", "Fia's Champions", "Lichdragon Fortissax"
+            ],
+            "LAKE OF ROT": [
+                "Astel, Naturalborn of the Void", "Dragonkin Soldier"
+            ],
+            "LEYNDELL, ASHEN CAPITAL": [
+                "Esgar, Priest of Blood", "Godfrey, First Elden Lord (Hoarah Loux)",
+                "Mohg, the Omen", "Sir Gideon Ofnir, the All-Knowing"
+            ],
+            "ELDEN THRONE": [
+                "Radagon of the Golden Order / Elden Beast"
+            ],
+            "GRAVESITE PLAIN (SOTE)": [
+                "Blackgaol Knight", "Chief Bloodfiend", "Demi-Human Swordmaster Onze",
+                "Divine Beast Dancing Lion", "Ghostflame Dragon", "Lamenter",
+                "Rellana Twin Moon Knight", "Red Bear"
+            ],
+            "SCADU ALTUS (SOTE)": [
+                "Black Knight Edreed", "Black Knight Garrew", "Commander Gaius",
+                "Count Ymir, Mother of Fingers", "Curseblade Labirith", "Death Knight",
+                "Dryleaf Dane", "Ghostflame Dragon", "Golden Hippopotamus",
+                "Messmer the Impaler + Base Serpent Messmer", "Metyr, Mother of Fingers",
+                "Rakshasa", "Ralva the Great Red Bear", "Tree Sentinel"
+            ],
+            "RAUH BASE (SOTE)": [
+                "Death Knight", "Divine Beast Dancing Lion", "Romina, Saint of the Bud",
+                "Rugalea the Great Red Bear"
+            ],
+            "CERULEAN COAST (SOTE)": [
+                "Dancer of Ranah", "Ghostflame Dragon", "Putrescent Knight"
+            ],
+            "CHARO'S HIDDEN GRAVE (SOTE)": [
+                "Death Rite Bird", "Demi-Human Queen Marigga"
+            ],
+            "JAGGED PEAK (SOTE)": [
+                "Ancient Dragon-Man", "Ancient Dragon Senessax", "Bayle the Dread",
+                "Jagged Peak Drake"
+            ],
+            "ABYSSAL WOODS (SOTE)": [
+                "Jori, Elder Inquisitor", "Midra Lord of Frenzied Flame"
+            ],
+            "SCADUVIEW (SOTE)": [
+                "Fallingstar Beast", "Scadutree Avatar", "Tree Sentinel"
+            ],
+            "ENIR-ILIM (SOTE)": [
+                "Promised Consort Radahn + Radahn Consort of Miquella"
+            ],
+            "FINGER RUINS RHIA (SOTE)": [
+                "Jagged Peak Drake"
+            ],
+        };
+
+        const checklist = document.getElementById('checklist');
+        function createBossLink(bossName) {
+            const cleanedBossName = bossName.replace(/\s*\(.*?\)\s*/g, '').trim();
+            return `https://eldenring.wiki.fextralife.com/${cleanedBossName.replace(/ /g, '+')}`;
+        }
+
+        function updateOverallCounter() {
+            const totalBosses = Object.values(bossesByLocation).flat().length;
+            const checkedCheckboxes = document.querySelectorAll('#checklist input[type="checkbox"]:checked').length;
+            document.getElementById('overallCounter').textContent = `${checkedCheckboxes}/${totalBosses}`;
+        }
+
+        // Function to create checklist items
+        function createChecklistItems() {
+            for (const [location, bosses] of Object.entries(bossesByLocation)) {
+                const locationDiv = document.createElement('div');
+                locationDiv.className = 'location';
+                
+                const locationHeader = document.createElement('h2');
+                locationHeader.innerHTML = `${location} <span class="counter">0/${bosses.length}</span>`;
+                locationDiv.appendChild(locationHeader);
+
+                const ul = document.createElement('ul');
+                bosses.forEach((boss, index) => {
+                    const li = document.createElement('li');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `${location}-${index}`;
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `${location}-${index}`;
+
+                    const link = document.createElement('a');
+                    link.href = createBossLink(boss);
+                    link.textContent = boss;
+                    link.target = '_blank'; // Open in new tab
+                    link.onclick = (e) => e.stopPropagation(); // Prevent checkbox toggle when clicking the link
+
+                    if (location.includes('(SOTE)')) {
+                        link.classList.add('sote');
+                    }
+
+                    label.appendChild(link);
+
+                    li.appendChild(checkbox);
+                    li.appendChild(label);
+                    ul.appendChild(li);
+
+                    // Add click event to the entire li element
+                    li.addEventListener('click', (e) => {
+                        if (e.target !== link) {
+                            checkbox.checked = !checkbox.checked;
+                            saveState();
+                            updateCounter(locationHeader, ul);
+                            updateOverallCounter();
+                            if (checkbox.checked) {
+                                li.classList.add('checked-item');
+                            } else {
+                                li.classList.remove('checked-item');
+                            }
+                        }
+                    });
+                });
+
+                locationDiv.appendChild(ul);
+                checklist.appendChild(locationDiv);
+            }
+        }
+
+        // Function to update counter
+        function updateCounter(header, list) {
+            const total = list.children.length;
+            const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+            header.querySelector('.counter').textContent = `${checked}/${total}`;
+        }
+
+        // Function to save the state to localStorage
+        function saveState() {
+            const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
+            const state = Array.from(checkboxes).map(checkbox => checkbox.checked);
+            localStorage.setItem('checklistState', JSON.stringify(state));
+        }
+
+        // Function to load the state from localStorage
+        function loadState() {
+            const savedState = localStorage.getItem('checklistState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                const checkboxes = document.querySelectorAll('#checklist input[type="checkbox"]');
+                state.forEach((checked, index) => {
+                    if (index < checkboxes.length) {
+                        checkboxes[index].checked = checked;
+                        const li = checkboxes[index].closest('li');
+                        if (checked) {
+                            li.classList.add('checked-item');
+                        } else {
+                            li.classList.remove('checked-item');
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize checklist items
+        createChecklistItems();
+
+        // Load saved state
+        loadState();
+
+        // Update counters on initial load
+        const headers = document.querySelectorAll('.location h2');
+        const lists = document.querySelectorAll('.location ul');
+        headers.forEach((header, index) => {
+            updateCounter(header, lists[index]);
+        });
+
+        // Update overall counter on initial load
+        updateOverallCounter();
+
+    </script>
+</body>
+</html>
